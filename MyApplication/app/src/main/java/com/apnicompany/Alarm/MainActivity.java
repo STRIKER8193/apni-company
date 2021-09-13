@@ -2,9 +2,6 @@ package com.apnicompany.Alarm;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +12,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import java.util.Calendar;
 
@@ -40,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
     // OnToggleClicked() method is implemented the time functionality
     public void OnToggleClicked(View view) {
 
-
-
         long time;
         if (((ToggleButton) view).isChecked()) {
             Toast.makeText(MainActivity.this, "ALARM ON", Toast.LENGTH_SHORT).show();
@@ -50,7 +46,11 @@ public class MainActivity extends AppCompatActivity {
             // calender is called to get current time in hour and minute
             calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
             calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
+            calendar.set(Calendar.SECOND,1);
 
+            // set alarm 10 minutes earlier
+            calendar.add(Calendar.MINUTE, -10);
+            Toast.makeText(MainActivity.this,  calendar.getTime().toString(), Toast.LENGTH_SHORT).show();
             // using intent i have class AlarmReceiver class which inherits
             // BroadcastReceiver
 
@@ -68,12 +68,25 @@ public class MainActivity extends AppCompatActivity {
             // Alarm rings continuously until toggle button is turned off
        //     alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time, 10000, pendingIntent);
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+
+            // Notification
+
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "123")
+                 //   .setSmallIcon(R.drawable.)
+                    .setContentTitle("My notification")
+                    .setContentText("Hello World!")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .addAction(R.id.toggleButton2, "snooze",
+                            pendingIntent);
+
+
             // alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (time * 1000), pendingIntent);
         } else {
          //   pendingIntent=PendingIntent.getBroadcast(this,321,intent,PendingIntent.FLAG_CANCEL_CURRENT);
 if(pendingIntent!=null && alarmManager!=null) {
     alarmManager.cancel(pendingIntent);
-    AlarmReceiver.stopRintone(this, intent);
+    AlarmReceiver.stopRintone();
     AlarmReceiver.ringtone = null;
     pendingIntent.cancel();
 
@@ -90,9 +103,9 @@ if(pendingIntent!=null && alarmManager!=null) {
     public void OnSnoozeClicked(View view) {
         long time;
         alarmManager.cancel(pendingIntent);
-        AlarmReceiver.stopRintone(this, intent);
+        AlarmReceiver.stopRintone();
         pendingIntent.cancel();
-            AlarmReceiver.incrementVolume(this,intent);
+            AlarmReceiver.incrementVolume();
             Toast.makeText(MainActivity.this, "Snoozed for 1 minute", Toast.LENGTH_SHORT).show();
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.MINUTE,1);
@@ -123,11 +136,11 @@ if(pendingIntent!=null && alarmManager!=null) {
 
 
     public static  void EnableSnoozeButton() {
-
-        btn.setEnabled(true);
+        btn.setVisibility(View.VISIBLE);
     }
 
     public static void DisableSnoozeButton() {
-        btn.setEnabled(false);
+        btn.setVisibility(View.GONE);
+        btn.setVisibility(View.INVISIBLE);
     }
 }
